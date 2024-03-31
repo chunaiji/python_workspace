@@ -1,6 +1,7 @@
 Flask
 pytesseract
 pdf2docx
+docx2pdf
 docx
 python-docx 
 pywin32
