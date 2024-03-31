@@ -6,6 +6,7 @@ from os.path import abspath, dirname
 from pytesseract_extention import pytesseract_extention
 from pdf_convert_extention import pdf_convert_extenton
 from os_extention import os_extention
+from psutil_extention import psutil_extention
  
 app = Flask(__name__)
 
@@ -16,6 +17,7 @@ pdf_convert_extention = pdf_convert_extenton("")
 @app.route('/')
 def hello_world():
     string=pytesseract_extention.image_to_string("E:\QQ图片20180326094950.jpg")
+    psutil_extention.showComputerInfo()
     return 'Hello, World!'+ " " +string
 
 @app.route('/convert')
