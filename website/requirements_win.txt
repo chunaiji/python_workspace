@@ -10,3 +10,5 @@ pyaudio
 pocketsphinx
 vosk
 psutil
+rembg
+pyttsx3
