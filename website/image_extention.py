@@ -1,10 +1,11 @@
 from turtle import width
-from PIL import Image
+from PIL import Image,ImageFilter,ImageEnhance
 from rembg import new_session, remove
 from tqdm import tqdm
 from watermarker.marker import add_mark
 
 # 需要下载训练模型  阿里网盘/安装包/u2net 解压到-> C:\Users\XXX\.u2net
+# https://blog.csdn.net/starvapour/article/details/108214478 python图片处理常用操作笔记
 class image_extention:
 
     def __init__(self, path):
@@ -56,7 +57,7 @@ class image_extention:
         # 保存灰度图
         gray_image.save(output_path)
 
-    # gif 提取图片
+    # gif 提取图片 https://baijiahao.baidu.com/s?id=1773831462594773582&wfr=spider&for=pc
     def get_image_from_gif(input_path):
         #读入一个GIF文件
         im = Image.open(input_path)
@@ -67,6 +68,25 @@ class image_extention:
                 im.save('picframe{:02d).png'.format(im.tell()))
         except:
             print("处理结束")
+
+    # 颜色交换
+    def split(input_path, output_path):
+        im = Image.open(input_path)
+        r, g, b = im.split()
+        om = Image.merge("RGB" , (b, g, r))
+        om.save(output_path)
+
+    # 提取轮廓
+    def filter(input_path, output_path):
+        im = Image.open(input_path)
+        om = im.filter(ImageFilter.CONTOUR)
+        om.save(output_path)
+    
+    # 图片增强
+    def contrast(input_path, output_path,enhance_num=2):
+        im = Image.open(input_path)
+        om = ImageEnhance.Contrast(im)
+        om.enhance(enhance_num).save(output_path)
 
     # 图片转换
     def convert_image(input_path, output_path,suffix='PNG'):
