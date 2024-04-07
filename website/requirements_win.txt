@@ -12,3 +12,4 @@ vosk
 psutil
 rembg
 pyttsx3
+filestools

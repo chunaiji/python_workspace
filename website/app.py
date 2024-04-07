@@ -22,7 +22,8 @@ image_extention=image_extention("")
 def hello_world():
     # string=pytesseract_extention.image_to_string("E:\QQ图片20180326094950.jpg")
     # psutil_extention.showComputerInfo()
-    pyttsx3_extention.convert_void("Hello, World",r"D:\\aaa.mp3");
+    # pyttsx3_extention.convert_void("Hello, World",r"D:\\aaa.mp3");
+    
     return 'Hello, World!'
 
 @app.route('/convert')
@@ -30,7 +31,9 @@ def hello_world1():
     # pdf_convert_extenton.pdf_convert_docx(r"D:\免费知网使用流程.pdf",r"D:\免费知网使用流程.docx",0,2)
     # pdf_convert_extenton.convert_to_pdf(r"D:\免费知网使用流程.pdf",r"D:\免费知网使用流程.docx")
     # pdf_convert_extenton.convert_to_pdf(r"D:\免费知网使用流程.docx",r"D:\免费知网使用流程.pdf")
-    image_extention.remove_background(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\1c4ca.png") 
+    # image_extention.remove_background(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\1c4ca.png") 
+    image_extention.remove_pixels(r"D:\python_demo\1c4ca.jpg", 200, r"D:\python_demo\1c4ca333.png")
+    # image_extention.add_mark(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\qq","hello word hhyu")
     # image_extention.replace_background(r"D:\3eccb.jpg") 
     return 'Hello, World!'
 
