@@ -32,9 +32,17 @@ def hello_world1():
     # pdf_convert_extenton.convert_to_pdf(r"D:\免费知网使用流程.pdf",r"D:\免费知网使用流程.docx")
     # pdf_convert_extenton.convert_to_pdf(r"D:\免费知网使用流程.docx",r"D:\免费知网使用流程.pdf")
     # image_extention.remove_background(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\1c4ca.png") 
-    image_extention.remove_pixels(r"D:\python_demo\1c4ca.jpg", 200, r"D:\python_demo\1c4ca333.png")
+    # image_extention.remove_pixels(r"D:\python_demo\1c4ca.jpg", 200, r"D:\python_demo\1c4ca333.png")  不满意
     # image_extention.add_mark(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\qq","hello word hhyu")
     # image_extention.replace_background(r"D:\3eccb.jpg") 
+    # image_extention.convert_cartoon(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\1c4ca.png") 不满意
+    # image_extention.contrast(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\1c4ca.png")
+    # image_extention.cartoon_effect(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\1c4ca.png")
+    # image_extention.filter(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\1c4ca.png")
+    # image_extention.contrast(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\qq1c4ca.png")
+    # image_extention.replace_background(r"D:\python_demo\1c344ca.png",r"D:\python_demo\replace.png", color=(255, 255, 255))
+    image_extention.compound(r"D:\python_demo\1c344ca.png",r"D:\python_demo\33333.jpg",r"D:\python_demo\reployyyace.png" )
+
     return 'Hello, World!'
 
 @app.route('/upload', methods=['POST'])

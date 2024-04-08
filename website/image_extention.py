@@ -3,6 +3,8 @@ from PIL import Image,ImageFilter,ImageEnhance
 from rembg import new_session, remove
 from tqdm import tqdm
 from watermarker.marker import add_mark
+import cv2
+import numpy as np
 
 # 需要下载训练模型  阿里网盘/安装包/u2net 解压到-> C:\Users\XXX\.u2net
 # https://blog.csdn.net/starvapour/article/details/108214478 python图片处理常用操作笔记
@@ -70,69 +72,105 @@ class image_extention:
             print("处理结束")
 
     # 颜色交换
-    def split(input_path, output_path):
+    def split(self,input_path, output_path):
         im = Image.open(input_path)
         r, g, b = im.split()
         om = Image.merge("RGB" , (b, g, r))
         om.save(output_path)
 
     # 提取轮廓
-    def filter(input_path, output_path):
+    def filter(self,input_path, output_path):
         im = Image.open(input_path)
         om = im.filter(ImageFilter.CONTOUR)
         om.save(output_path)
     
     # 图片增强
-    def contrast(input_path, output_path,enhance_num=2):
+    def contrast(self,input_path, output_path,enhance_num=2):
         im = Image.open(input_path)
         om = ImageEnhance.Contrast(im)
         om.enhance(enhance_num).save(output_path)
 
     # 图片转换
-    def convert_image(input_path, output_path,suffix='PNG'):
+    def convert_image(self,input_path, output_path,suffix='PNG'):
         with Image.open(input_path) as img:
             img.convert('RGB').save(output_path, suffix)
 
         # 使用函数转换图片
         # convert_image('input.jpg', 'output.png')
 
+    # 转为卡通
+    def convert_cartoon(self,input_path, output_path):
+        # 读取单通道黑白图片
+        img = cv2.imread(input_path,0)
+
+        # 拉普拉斯滤波器
+        kernal = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
+        img = cv2.filter2D(img, -1, kernal)
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3, 3))
+        # 膨胀两次
+        img = cv2.dilate(img,kernel,iterations=2)
+
+        # 腐蚀两次
+        img = cv2.erode(img,kernel,iterations=2)
+
+        # 二值化
+        ret,img=cv2.threshold(img,50,255,cv2.THRESH_BINARY_INV)
+
+        # 输出
+        cv2.imwrite(output_path,img)
+    
+    # 卡通
+    def cartoon_effect(self,input_path, output_path):
+        # 读取图片
+        image = Image.open(input_path)
+        # 将图片转换为灰度图
+        gray = image.convert('L')
+        # 使用边缘检测来强化图片的轮廓
+        edge_enhance = ImageEnhance.Contrast(gray)
+        edge_enhanced = edge_enhance.enhance(2)
+        # 二值化图片以创建卡通效果
+        cartoon = edge_enhanced.convert('1')
+        # 增加图片的灰度级别以增加卡通的颜色
+        # color_quantized = cartoon.convert('P', palette=Image.ADAPTIVE, colors=16)
+        color_quantized = cartoon.convert('P', colors=16)
+        color_quantized.save(output_path)
+    
+        # 使用函数转换图片
+        # cartoon_image = cartoon_effect('input.jpg')
+        # cartoon_image.save('output.jpg')
+
     # 替换图片背景
-    def replace_background(image_path, color=(255, 255, 255)):
-        # 加载图片
+    def replace_background(self,image_path, output_path, color=(255, 255, 255)):
+            # 打开图片
         img = Image.open(image_path)
-        
-        # 将图片转换为RGBA，以便处理透明度
-        img = img.convert("RGBA")
-        
-        # 分离通道
-        datas = img.getdata()
-        
-        newData = []
-        for item in datas:
-            # 如果该像素是完全透明的，则保留完全透明
-            if item[0] == 0:
-                newData.append((0, 0, 0, 0))
-            else:
-                # 如果不是完全透明的，则替换背景色
-                newData.append((color[0], color[1], color[2], item[3]))
-        
-        # 更新图片数据
-        img.putdata(newData)
-        img.save(r"D:\wewew.png")
-        return img
+        # 获取图片的模式，如果是RGBA则说明有透明背景
+        if img.mode == 'RGBA':
+            # 创建一个白色背景
+            background = Image.new('RGBA', img.size, color)
+            # 将img与背景合并
+            background.paste(img, mask=img.split()[3])
+            # 保存新图片
+            background.save(output_path)
+        else:
+            img.save(output_path)
 
     # 合并图片
-    def compound(image_path1,image_path2,out_path):
+    def compound(self,image_path1,image_path2,out_path):
         # 打开第一张图片
         img1 = Image.open(image_path1)
         # 打开第二张图片
         img2 = Image.open(image_path2)
+        width,height=img1.size
+        new_img=Image.new('RGB',(width,height))
+
         # 确保两张图片大小相同，如果不同，需要先调整大小
-        img2 = img2.resize(img1.size)
+        # new_img = img2.resize(img1.size)
         # 将两张图片合成
-        img1.paste(img2, mask=img2)
+        new_img.paste(img1, (0,0))
+        new_img.paste(img2, (0,0))
         # 保存合成的图片
-        img1.save(out_path)
+        new_img.save(out_path)
 
     # 去除水印 https://blog.csdn.net/weixin_53170155/article/details/136093323
     def remove_pixels(self,img_path, rgb_sum_threshold, dest_path):
