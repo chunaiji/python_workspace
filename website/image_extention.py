@@ -156,21 +156,31 @@ class image_extention:
             img.save(output_path)
 
     # 合并图片
-    def compound(self,image_path1,image_path2,out_path):
-        # 打开第一张图片
-        img1 = Image.open(image_path1)
-        # 打开第二张图片
-        img2 = Image.open(image_path2)
-        width,height=img1.size
-        new_img=Image.new('RGB',(width,height))
+    def compound(self,image_path1,image_path2,out_path,image1_alpha=128,image2_alpha=128):
+        # 打开第一个图形
+        image1 = Image.open(image_path1)
+        image1=image1.convert("RGBA")
+        image1_with_alpha=image1.copy()
+        # 调整透明度
+        image1_with_alpha.putalpha(image1_alpha)
 
-        # 确保两张图片大小相同，如果不同，需要先调整大小
-        # new_img = img2.resize(img1.size)
-        # 将两张图片合成
-        new_img.paste(img1, (0,0))
-        new_img.paste(img2, (0,0))
-        # 保存合成的图片
-        new_img.save(out_path)
+        # 打开第二个图形
+        image2 = Image.open(image_path2)
+        
+        # 调整第二个图形的尺寸与第一个图形相同
+        image2 = image2.resize(image1.size)
+
+        image2=image2.convert("RGBA")
+        image2_with_alpha=image2.copy()
+        # 调整透明度
+        image2_with_alpha.putalpha(image2_alpha)
+
+        # 创建一个新的图形对象，并将两个图形叠加在一起
+        composite_image = Image.alpha_composite(image1_with_alpha,image2_with_alpha)
+
+        # 保存叠加后的图形
+        composite_image.save(out_path)
+
 
     # 去除水印 https://blog.csdn.net/weixin_53170155/article/details/136093323
     def remove_pixels(self,img_path, rgb_sum_threshold, dest_path):

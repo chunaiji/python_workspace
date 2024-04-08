@@ -41,7 +41,7 @@ def hello_world1():
     # image_extention.filter(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\1c4ca.png")
     # image_extention.contrast(r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\qq1c4ca.png")
     # image_extention.replace_background(r"D:\python_demo\1c344ca.png",r"D:\python_demo\replace.png", color=(255, 255, 255))
-    image_extention.compound(r"D:\python_demo\1c344ca.png",r"D:\python_demo\33333.jpg",r"D:\python_demo\reployyyace.png" )
+    image_extention.compound(r"D:\python_demo\33333.jpg",r"D:\python_demo\1c4ca.jpg",r"D:\python_demo\reployyyace.png" )
 
     return 'Hello, World!'
 
