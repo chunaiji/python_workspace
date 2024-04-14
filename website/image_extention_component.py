@@ -7,51 +7,22 @@ from watermarker.marker import add_mark
 import cv2
 import numpy as np
 from skimage import data_dir, io, transform, color
+import os
+from os_extention import os_extention
 
 # 需要下载训练模型  阿里网盘/安装包/u2net 解压到-> C:\Users\XXX\.u2net
 # https://blog.csdn.net/starvapour/article/details/108214478 python图片处理常用操作笔记
 
 
-class image_extention:
+class image_extention_component:
 
     def __init__(self, path):
         self.path = path
 
-    def remove_background1(image_path, output_path):
-        input = Image.open(image_path)
-        output = remove(input)
+    def remove_background(img, output_path, model):
+        # model = 'u2net_human_seg' # 指定模型类型
+        output = remove(img, session=new_session(model))
         output.save(output_path)
-        return output_path
-
-    def remove_background_core(image_path):
-        model = 'u2net_human_seg'  # 指定模型类型
-        with open(image_path, "rb") as image_file:
-            image_data = image_file.read()
-            result = remove(image_data, session=new_session(model))
-            return result
-    # https://blog.51cto.com/u_16175447/8698505
-    # https://juejin.cn/post/7250291603814694970
-
-    def fix_black_border(image):
-        width, height = image.size
-        pixels = image.load()
-        for x in range(width):
-            for y in range(height):
-                r, g, b, a = pixels[x, y]
-                if a == 0:
-                    pixels[x, y] = (255, 255, 255, 0)
-        return image
-
-    # 去除图片背景
-    def remove_background(self, image_path, out_path):
-        image = image_extention.remove_background_core(image_path)
-
-        with open(out_path, "wb") as out_file:
-            out_file.write(image)
-
-        with Image.open(out_path) as image_file:
-            out_image = image_extention.fix_black_border(image_file)
-            out_image.save(out_path)
 
     # 转为灰度
     def convert_gray(input_path, output_path):
@@ -75,7 +46,7 @@ class image_extention:
         str = '*.png'  # str=data_dir+'/*.jpg:'+data_dir+'/*.png'
         # 集合处理函数ImageCollection
         coll = io.ImageCollection(
-            str, load_func=image_extention.convert_gray_core)
+            str, load_func=image_extention_component.convert_gray_core)
         for i in range(len(coll)):
             io.imsave('xx_' + np.str(i)+'.jpg', coll[i])  # 循环保存图片
 
@@ -87,8 +58,7 @@ class image_extention:
         image.save(output_path)
 
     # 压缩图片 调整图片质量
-    def compress(input_path, output_path, quality=20):
-        img = Image.open(input_path)
+    def compress(img, output_path, quality=20):
         img.save(output_path, quality)
 
     # 裁剪
@@ -111,12 +81,11 @@ class image_extention:
             print("处理结束")
 
     # 颜色交换
-    def exchange(self, input_path, output_path):
-        im = Image.open(input_path)
-        r, g, b = im.split()
+    def exchange(img,  output_path):
+        r, g, b = img.split()
         newg = g.point(lambda i: i * 0.9)  # 将G通道颜色值变为原来的0.9倍
         newb = b.point(lambda i: i < 100)  # 选择B通道值低于100的像素点
-        om = Image.merge(im.mode, (r, newg, newb))  # 将3个通道合形成新图像
+        om = Image.merge(img.mode, (r, newg, newb))  # 将3个通道合形成新图像
         # om = Image.merge("RGB", (b, g, r))
         om.save(output_path)
 
@@ -130,16 +99,14 @@ class image_extention:
             tile.save(f'tile_{i}_{tile.mode}.jpg')
 
     # 图片增强 https://blog.csdn.net/JBY2020/article/details/125358387 修改亮度没实现
-    def contrast(self, input_path, output_path, enhance_num=2):
-        img = Image.open(input_path)
+    def contrast(img, output_path, enhance_num=2):
         # img_color = ImageEnhance.Color(img)
         # img_brightness = ImageEnhance.Brightness(img)
         om = ImageEnhance.Contrast(img)
         om.enhance(enhance_num).save(output_path)
 
     # 调整亮度
-    def brightness(self, input_path, output_path, enhance_num=1.5):
-        img = Image.open(input_path)
+    def brightness(img, output_path, enhance_num=1.5):
         # 调整亮度（增加50%）
         brighter_img = img.point(lambda p: p * enhance_num)
         brighter_img.save(output_path)
@@ -154,9 +121,8 @@ class image_extention:
     #   FIND_EDGES：寻找边缘
     #   SHARPEN：锐化
     #   SMOOTH：平滑
-    def filter(self, input_path, output_path, filter=ImageFilter.CONTOUR):
-        im = Image.open(input_path)
-        om = im.filter(filter)  # 高斯模糊
+    def filter(img, output_path, filter=ImageFilter.CONTOUR):
+        om = img.filter(filter)  # 高斯模糊
         om.save(output_path)
 
     # 图片转换
@@ -190,11 +156,11 @@ class image_extention:
         cv2.imwrite(output_path, img)
 
     # 卡通
-    def cartoon_effect(self, input_path, output_path):
+    def cartoon_effect(img, output_path):
         # 读取图片
-        image = Image.open(input_path)
+        # image = Image.open(input_path)
         # 将图片转换为灰度图
-        gray = image.convert('L')
+        gray = img.convert('L')
         # 使用边缘检测来强化图片的轮廓
         edge_enhance = ImageEnhance.Contrast(gray)
         edge_enhanced = edge_enhance.enhance(2)
@@ -210,9 +176,7 @@ class image_extention:
         # cartoon_image.save('output.jpg')
 
     # 替换图片背景
-    def replace_background(self, image_path, output_path, color=(255, 255, 255)):
-        # 打开图片
-        img = Image.open(image_path)
+    def replace_background(img, output_path, color=(255, 255, 255)):
         # 获取图片的模式，如果是RGBA则说明有透明背景
         if img.mode == 'RGBA':
             # 创建一个白色背景
@@ -225,7 +189,7 @@ class image_extention:
             img.save(output_path)
 
     # 合并图片
-    def compound(self, image_path1, image_path2, out_path, image1_alpha=128, image2_alpha=128):
+    def compound(image_path1, image_path2, out_path, image1_alpha=128, image2_alpha=128):
         # 打开第一个图形
         image1 = Image.open(image_path1)
         image1 = image1.convert("RGBA")
@@ -271,13 +235,60 @@ class image_extention:
                  opacity=opacity, angle=angle, space=space)
 
     # 所有操作集合
-    def component(self, image_path):
-        paths=[];
+    def component(image_path):
+
+        absolute_path = os.path.abspath(image_path)
+        folder_path = os.path.dirname(image_path)
+        file_name = os.path.basename(image_path)
+        suffix = str(".") + file_name.split(".")[-1]
+        name_no_suffix = file_name.split(".")[0]
+        create_dir_path = os.path.join(folder_path, name_no_suffix)
+
+        paths = []
+
+        os_extention.check(create_dir_path)
         img = Image.open(image_path)
         # 去除背景
+        remove_back_path = os.path.join(
+            create_dir_path, name_no_suffix+str("_remove")+str('.png'))
+        image_extention_component.remove_background(
+            img, remove_back_path, model='u2net_human_seg')
+        paths.append(image_path)
 
-        paths.append(4)
-        img.save(image_path)
+        # 颜色交换
+        exchange_path = os.path.join(
+            create_dir_path,  name_no_suffix+str("_exchange")+suffix)
+        image_extention_component.exchange(img,  exchange_path)
+        paths.append(exchange_path)
+
+        replace_back_path = os.path.join(
+            create_dir_path,  name_no_suffix+str("_replace")+suffix)
+        image_extention_component.replace_background(
+            img, replace_back_path, color=(255, 255, 255))
+        paths.append(replace_back_path)
+
+        brightness_path = os.path.join(
+            create_dir_path,  name_no_suffix+str("_brightness")+suffix)
+        image_extention_component.brightness(
+            img, brightness_path, enhance_num=1.5)
+        paths.append(brightness_path)
+
+        contrast_path = os.path.join(
+            create_dir_path,  name_no_suffix+str("_contrast")+suffix)
+        image_extention_component.contrast(img, contrast_path, enhance_num=2)
+        paths.append(contrast_path)
+
+        filter_path = os.path.join(
+            create_dir_path,  name_no_suffix+str("_filter")+suffix)
+        image_extention_component.filter(img, filter_path, filter=ImageFilter.CONTOUR)
+        paths.append(filter_path)
+
+        cartoon_path = os.path.join(
+            create_dir_path,  name_no_suffix+str("_cartoon")+str('.png'))
+        image_extention_component.cartoon_effect(img, cartoon_path)
+        paths.append(cartoon_path)
+        return paths
+
 
 # # 调用函数进行测试
 # result = remove_background("input.jpg")

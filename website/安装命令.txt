@@ -1,1 +1,10 @@
 pip install -r requirements_win.txt
+
+
+
+
+# 打包方式
+# pip install pyinstaller # 下载pyinstaller
+# 切换虚拟目录
+# pyi-makespec app.py # 生成打包文件
+# pyinstaller .\app.spec # 开始打包 单个文件

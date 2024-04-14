@@ -2,6 +2,8 @@ from flask import Flask, request
 from werkzeug.utils import secure_filename
 import os
 from os.path import abspath, dirname
+from flask_cors import CORS
+import datetime
 
 from pytesseract_extention import pytesseract_extention
 from pdf_convert_extention import pdf_convert_extenton
@@ -9,8 +11,10 @@ from os_extention import os_extention
 from psutil_extention import psutil_extention
 from image_extention import image_extention
 from pyttsx3_extention import pyttsx3_extention
+from image_extention_component import image_extention_component
  
 app = Flask(__name__)
+CORS(app)
 
 tesseract_path=r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 pytesseract_extention = pytesseract_extention(tesseract_path)
@@ -45,7 +49,15 @@ def hello_world1():
 
     return 'Hello, World!'
 
-@app.route('/upload', methods=['POST'])
+@app.route('/init')
+def init_image():
+    paths= image_extention_component.component(r"D:\python_demo\33333.jpg")
+    out_put_path=''
+    for path in paths:
+        out_put_path=out_put_path+'|'+path
+    return out_put_path;
+
+@app.route('/api/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return 'No file part', 400
@@ -56,9 +68,8 @@ def upload_file():
  
     if file:
         filename = secure_filename(file.filename)
-        # print(abspath(__file__))
-        print(dirname(abspath(__file__)))
-        dir_path=dirname(abspath(__file__))+str("\\path\\to\\upload1\\")
+        current_date = datetime.date.today()
+        dir_path=dirname(abspath(__file__))+str("\\path\\upload\\")+str(current_date)+str("\\")
         os_extention.check(dir_path)
         file_path=dir_path+str(filename)
         print(file_path)
